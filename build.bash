@@ -1,0 +1,1 @@
+exec clang++ mines.cpp -lncurses -o mines
