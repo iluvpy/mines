@@ -15,6 +15,7 @@ public:
         initscr();
         noecho();
         cbreak();
+        keypad(stdscr, true);
     }
 
     void setGameDifficulty() {
@@ -27,35 +28,50 @@ public:
         }
         int row, col;
         getmaxyx(stdscr, row, col);
-        int start_row = row / 2;
-        int start_col = (col - strlen(welcomeMsg)) / 2;
-        mvprintw(start_row, start_col, "%s", welcomeMsg);
-        start_row++;
+        int startRow = row / 2;
+        int startCol = (col - strlen(welcomeMsg)) / 2;
+        mvprintw(startRow, startCol, "%s", welcomeMsg);
+        startRow++;
 
-        start_col = (col - strlen(modesMsg)) / 2;
-        mvprintw(start_row, start_col, "%s", modesMsg);
-
-        // -5 = strlen("10x10")
-        start_col = (col - 5) / 2;
-
-        for (const auto& mode : modes) {
-            start_row++;
-            mvprintw(start_row, start_col, "%s", mode.c_str());
-        }
-
-        mvprintw(start_row, start_col, "%s", modesMsg);
+        startCol = (col - strlen(modesMsg)) / 2;
+        mvprintw(startRow, startCol, "%s", modesMsg);
 
         refresh();
-        
-        while (1) {
-            int c = getch();
-            if (c == 44) {
-                exit(0);
+        int ch = 0;
+        int highlightedIndex = 0;
+        startCol = (col - 5) / 2; // -5 = strlen("10x10")
+        do  {
+            if (ch == KEY_UP) {
+                highlightedIndex -= highlightedIndex > 0 ? 1 : 0;
+            } else if (ch == KEY_DOWN) {
+                highlightedIndex += highlightedIndex < modes.size() ? 1 : 0; 
             }
-        }
+            if (ch == 10) { break;}
+            int i = 0;
+            // print possible choices
+            for (const auto& mode : modes) {
+                startRow++;
+                if (i == highlightedIndex) {
+                    attron(A_REVERSE);
+                }
+                mvprintw(startRow, startCol, "%s", mode.c_str());
+                attroff(A_REVERSE);
+                i++;
+            }
+            startRow -= modes.size();
+            refresh();
 
+        } while ((ch = getch()) != 'q');
+
+        mvprintw(0, 0, "chose %s", modes[highlightedIndex].c_str());
+        refresh();
+
+        game();
     }
 
+    void game() {
+        getch();
+    }
 
     ~MinesCLI() {
         endwin();
