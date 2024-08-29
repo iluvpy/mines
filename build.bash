@@ -1,1 +1,1 @@
-exec clang++ mines.cpp -lncurses -o mines
+exec clang++ mines.cpp -Wall -Werror -Wpedantic -lncurses -o mines
