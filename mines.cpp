@@ -17,7 +17,8 @@ class MinesCLI {
 
 private:
     std::vector<std::vector<BoardSquare>> m_board;
-
+    bool m_gameRunning = true;
+    
 public:
     MinesCLI() {
         initNCurses();
@@ -96,16 +97,18 @@ public:
             refresh();
 
         } while ((ch = getch()) != 'q');
+        if (ch == 'q') m_gameRunning = false;
 
+        clear();
         return highlightedIndex;
     }
 
     void generateBoard(int difficultyIndex) {
-        int widthAndHeight = difficultyIndex * 10;
+        int widthAndHeight = (difficultyIndex + 1) * 10;
         for (int i = 0; i < widthAndHeight; i++) {
             std::vector<BoardSquare> row;
             for (int j = 0; j < widthAndHeight; j++) {
-                row.push_back(BoardSquare(randomFloat(0.0f, 1.0f) >= 0.3f));
+                row.push_back(BoardSquare(randomFloat(0.0f, 1.0f) <= 0.3f));
             }
             m_board.push_back(row);
         }
@@ -117,7 +120,7 @@ public:
             updateBoard();
             printBoard();
             refresh();
-        } while ((ch = getch() != 'q'));
+        } while ((ch = getch() != 'q') && m_gameRunning);
     }
 
     // TODO
@@ -127,9 +130,12 @@ public:
 
     void printBoard() {
         for (int i = 0; i < m_board.size(); i++) {
-            for (int j = 0; j < m_board[0].size(); i++) {
+            for (int j = 0; j < m_board[0].size(); j++) {
                 if (!m_board[i][j].m_isUncovered) {
                     mvprintw(i, j, "O");
+                } 
+                if (m_board[i][j].m_isMine) {
+                    mvprintw(i, j, "*");
                 }
             }
         }
